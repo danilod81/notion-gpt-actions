@@ -1,22 +1,67 @@
 openapi: 3.0.0
 info:
-  title: Notion Page Fetch
+  title: Notion Database CRUD
   version: 1.0.0
+  description: Read and write items from a Notion database.
+
+servers:
+  - url: https://api.notion.com/v1
+
 paths:
-  /v1/pages/{page_id}:
-    get:
-      summary: Get a Notion page by ID
+  /databases/{database_id}/query:
+    post:
+      summary: Query a Notion database
+      operationId: queryDatabase
       parameters:
-        - name: page_id
-          in: path
+        - in: path
+          name: database_id
           required: true
           schema:
             type: string
+          description: The ID of the Notion database
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Optional filters or sorts
       responses:
         '200':
-          description: A Notion page
+          description: Query results
       security:
         - bearerAuth: []
+
+  /pages:
+    post:
+      summary: Create a new page in a Notion database
+      operationId: createPage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - parent
+                - properties
+              properties:
+                parent:
+                  type: object
+                  required:
+                    - database_id
+                  properties:
+                    database_id:
+                      type: string
+                properties:
+                  type: object
+                  description: Page properties based on the database schema
+      responses:
+        '200':
+          description: Page created
+      security:
+        - bearerAuth: []
+
 components:
   securitySchemes:
     bearerAuth:
